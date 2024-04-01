@@ -8,7 +8,9 @@ type Props = {
 const Loader = ({ className }: Props) => {
   return (
     <div className="flex justify-center items-center">
-      <Loader2Icon className={cn('w-5 h-5 animate-spin', className)} />
+      <Loader2Icon
+        className={cn('w-5 h-5 lg:w-10 lg:h-10 animate-spin', className)}
+      />
     </div>
   );
 };

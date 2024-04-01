@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { randomUUID } from 'crypto';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Api } from '../Api';
 import { IWish, IWishCreate } from '../models/Wish';
@@ -30,25 +30,25 @@ export const useCreateWish = () => {
         ...(prev || []),
         {
           ...newWish,
-          id: randomUUID(),
-          dateCreated: new Date().toISOString(),
+          id: uuidv4(),
         },
       ]);
 
       return { prevWishes };
     },
     onError: (err, newWish, context) => {
+      console.error(err);
       queryClient.setQueryData(queryKeys.list(), context?.prevWishes);
       toast('Помилка', {
         description: 'Виникла помилка під час додавання бажання!',
       });
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.list() });
+    onSuccess: () =>
       toast('Успіх', {
         description: 'Бажання успішно додано!',
-      });
-    },
+      }),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.list() }),
   });
 };
 
@@ -73,11 +73,11 @@ export const useDeleteWish = () => {
         description: 'Виникла помилка під час видалення бажання!',
       });
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.list() });
+    onSuccess: () =>
       toast('Успіх', {
         description: 'Бажання видалено!',
-      });
-    },
+      }),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.list() }),
   });
 };

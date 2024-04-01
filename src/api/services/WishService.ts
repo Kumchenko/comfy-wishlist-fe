@@ -20,7 +20,6 @@ export class WishService {
   };
 
   createOne = async (newWish: IWishCreate) => {
-    console.log('CREATE ONE');
     return (await apiClient.post(`/wishlist`, newWish)).data as IWish;
   };
 

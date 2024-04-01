@@ -34,8 +34,12 @@ const schema = z.object({
     .string()
     .min(5, 'Назва повинна бути мінімум 5 символів')
     .max(64, 'Назва повинна бути мінімум 64 символів'),
-  url: z.string(),
-  price: z.number(),
+  url: z.string().includes('comfy.ua', {
+    message: 'Посилання має бути саме на товар з магазину Comfy',
+  }),
+  price: z
+    .string()
+    .refine((arg) => !!parseFloat(arg), 'Значення має бути числом'),
 });
 
 type Values = z.infer<typeof schema>;
@@ -47,10 +51,10 @@ export const AddForm = () => {
 
   const form = useForm<Values>({
     mode: 'onTouched',
+    resolver: zodResolver(schema),
     defaultValues: {
       title: '',
       url: '',
-      price: 0,
     },
   });
 
@@ -64,7 +68,7 @@ export const AddForm = () => {
       toast('Успіх', {
         description: `Ціна товару складає ${price}грн!`,
       });
-      setValue('price', price);
+      setValue('price', price.toString());
     } catch (e) {
       toast('Помилка', {
         description: 'Досягнуто ліміт розпізнавань або ціну не знайдено!',
@@ -77,8 +81,9 @@ export const AddForm = () => {
   const onSubmit = ({ title, price, url }: Values) => {
     createWish({
       title,
-      price,
+      price: parseFloat(price),
       url,
+      dateCreated: new Date().toISOString(),
     });
   };
 
@@ -134,7 +139,7 @@ export const AddForm = () => {
                 <FormItem>
                   <FormLabel>Ціна (грн)</FormLabel>
                   <FormControl>
-                    <Input placeholder="1200,99" {...field} />
+                    <Input placeholder="1200.99" {...field} />
                   </FormControl>
                   <FormDescription>Ціна на товар</FormDescription>
                   <FormMessage />

@@ -1,74 +1,50 @@
 'use client';
 
 import {
-  flexRender,
   getCoreRowModel,
+  getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
 
 import { useWishes } from '@/api/queries/WishQueries';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
-import { columns } from './columns';
+import H1 from '@/components/typography/H1';
+import Loader from '@/components/ui/loader';
+import { useWishColumns } from '@/components/WishTable/columns';
+import { WishTable } from '@/components/WishTable/WishTable';
 
 export default function Page() {
-  const { data } = useWishes();
+  const { data, isError } = useWishes();
+
+  const columns = useWishColumns();
+
   const table = useReactTable({
     data: data ?? [],
     columns,
+    initialState: {
+      sorting: [{ desc: true, id: 'dateCreated' }],
+    },
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
+
+  const getContent = () => {
+    if (data) {
+      return <WishTable table={table} columns={columns} />;
+    }
+    if (isError) {
+      return 'Сталася помилка :(';
+    }
+    return (
+      <div className="py-8">
+        <Loader />
+      </div>
+    );
+  };
+
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && 'selected'}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    <>
+      <H1 className="mb-6">Усі бажання</H1>
+      {getContent()}
+    </>
   );
 }
