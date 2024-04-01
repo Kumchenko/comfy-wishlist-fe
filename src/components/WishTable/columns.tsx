@@ -37,8 +37,7 @@ export const useWishColumns = (): ColumnDef<IWish>[] => {
           original: { dateCreated },
         },
       }) => {
-        const date = dateCreated?.slice(0, -6) + 'Z';
-        return `${format(date, 'do MMMM y  H:mm')} – ${formatDistanceToNow(date, { addSuffix: true })}`;
+        return `${format(dateCreated, 'do MMMM y  H:mm')} – ${formatDistanceToNow(dateCreated, { addSuffix: true })}`;
       },
     },
     {

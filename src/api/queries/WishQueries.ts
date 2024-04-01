@@ -16,6 +16,11 @@ export const useWishes = () =>
   useQuery({
     queryKey: queryKeys.list(),
     queryFn: Api.Wish.getAll,
+    select: (data) =>
+      data.map(({ dateCreated, ...el }) => ({
+        ...el,
+        dateCreated: dateCreated.slice(0, -6) + 'Z',
+      })),
   });
 
 export const useCreateWish = () => {
