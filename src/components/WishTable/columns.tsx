@@ -49,7 +49,7 @@ export const useWishColumns = (): ColumnDef<IWish>[] => {
           original: { url },
         },
       }) => (
-        <Link className="underline" href={url}>
+        <Link className="underline break-words" href={url}>
           {url}
         </Link>
       ),
