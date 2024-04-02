@@ -25,6 +25,7 @@ export const useWishColumns = (): ColumnDef<IWish>[] => {
           original: { title },
         },
       }) => <span className="font-medium">{title}</span>,
+      footer: () => 'Total',
     },
     {
       accessorKey: 'dateCreated',
@@ -64,6 +65,12 @@ export const useWishColumns = (): ColumnDef<IWish>[] => {
           original: { price },
         },
       }) => `${price} UAH`,
+      footer: ({ table }) => {
+        const rows = table.getFilteredRowModel().rows;
+        return (
+          rows.reduce((acc, cur) => acc + cur.original?.price ?? 0, 0) + ' UAH'
+        );
+      },
     },
     {
       accessorKey: 'deletion',

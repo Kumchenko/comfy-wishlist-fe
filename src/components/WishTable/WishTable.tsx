@@ -9,6 +9,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -78,6 +79,31 @@ export const WishTable = <TData extends unknown>({
             </TableRow>
           )}
         </TableBody>
+        <TableFooter>
+          {table.getFooterGroups().map((footerGroup) => (
+            <TableRow key={footerGroup.id}>
+              {footerGroup.headers.map((header) => {
+                return (
+                  <TableCell
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    style={{
+                      minWidth: header.getSize(),
+                      maxWidth: header.getSize(),
+                    }}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.footer,
+                          header.getContext()
+                        )}
+                  </TableCell>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableFooter>
       </Table>
     </div>
   );
