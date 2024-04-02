@@ -13,6 +13,7 @@ export interface IWishCreate {
   dateCreated: string;
 }
 
-export interface IWishPrice {
+export interface IWishParseResult {
+  name: string;
   price: number;
 }

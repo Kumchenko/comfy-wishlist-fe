@@ -20,7 +20,7 @@ export const RootProvider = ({ children }: PropsWithChildren) => {
         disableTransitionOnChange
       >
         {children}
-        <Toaster />
+        <Toaster richColors closeButton />
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

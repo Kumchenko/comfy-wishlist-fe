@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { Api } from '@/api/Api';
-import { useCreateWish } from '@/api/queries/WishQueries';
+import {
+  useCreateWish,
+  useParseWishByHtml,
+  useParseWishByUrl,
+} from '@/api/queries/WishQueries';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -40,14 +41,20 @@ const schema = z.object({
   price: z
     .string()
     .refine((arg) => !!parseFloat(arg), 'Значення має бути числом'),
+  file: z.instanceof(File).nullable(),
 });
 
 type Values = z.infer<typeof schema>;
 
 export const AddForm = () => {
   const { mutate: createWish } = useCreateWish();
-
-  const [isParsing, setIsParsing] = useState(false);
+  const {
+    mutate: parseByUrl,
+    isPending: isParsingByUrl,
+    isError,
+  } = useParseWishByUrl();
+  const { mutate: parseByHtml, isPending: isParsingByHtml } =
+    useParseWishByHtml();
 
   const form = useForm<Values>({
     mode: 'onTouched',
@@ -55,27 +62,36 @@ export const AddForm = () => {
     defaultValues: {
       title: '',
       url: '',
+      price: '',
+      file: null,
     },
   });
 
-  const { handleSubmit, getValues, setValue } = form;
+  const { handleSubmit, getValues, setValue, watch } = form;
 
-  const onParse = async () => {
-    try {
-      setIsParsing(true);
-      const url = getValues().url;
-      const { price } = await Api.Wish.parsePrice(url);
-      toast('Успіх', {
-        description: `Ціна товару складає ${price}грн!`,
+  const isFileUploaded = !!watch('file');
+
+  const onUrlParse = async () => {
+    const url = getValues().url;
+
+    parseByUrl(url, {
+      onSuccess: ({ name, price }) => {
+        setValue('title', name);
+        setValue('price', price.toString());
+      },
+    });
+  };
+
+  const onHtmlParse = async () => {
+    const file = getValues().file;
+
+    file &&
+      parseByHtml(file, {
+        onSuccess: ({ name, price }) => {
+          setValue('title', name);
+          setValue('price', price.toString());
+        },
       });
-      setValue('price', price.toString());
-    } catch (e) {
-      toast('Помилка', {
-        description: 'Досягнуто ліміт розпізнавань або ціну не знайдено!',
-      });
-    } finally {
-      setIsParsing(false);
-    }
   };
 
   const onSubmit = ({ title, price, url }: Values) => {
@@ -106,20 +122,6 @@ export const AddForm = () => {
           <CardContent className="flex flex-col gap-4">
             <FormField
               control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Назва</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Смарт-годинник" {...field} />
-                  </FormControl>
-                  <FormDescription>Назва вашого бажання</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="url"
               render={({ field }) => (
                 <FormItem>
@@ -132,6 +134,66 @@ export const AddForm = () => {
                 </FormItem>
               )}
             />
+
+            {isError && (
+              <FormField
+                control={form.control}
+                name="file"
+                render={({ field: { onChange, value, ...field } }) => (
+                  <FormItem>
+                    <FormLabel>HTML файл</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="file"
+                        accept="text/html,.html,.htm"
+                        {...field}
+                        onChange={(e) => onChange(e.target.files?.[0])}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Збережена HTML-сторінка Comfy з товаром
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            <div className="flex gap-4 justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onUrlParse}
+                disabled={isParsingByUrl}
+              >
+                {isError ? 'Спробувати ще раз' : 'Спарсити URL'}
+              </Button>
+              {isError && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onHtmlParse}
+                  disabled={isParsingByHtml || !isFileUploaded}
+                >
+                  Спарсити HTML
+                </Button>
+              )}
+            </div>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem className="mt-8">
+                  <FormLabel>Назва</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Смарт-годинник" {...field} />
+                  </FormControl>
+                  <FormDescription>Назва вашого бажання</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="price"
@@ -147,16 +209,8 @@ export const AddForm = () => {
               )}
             />
           </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onParse()}
-              disabled={isParsing}
-            >
-              Спарсити ціну
-            </Button>
-            <Button type="submit">Створити</Button>
+          <CardFooter className="flex justify-center">
+            <Button type="submit">Додати бажання до списку</Button>
           </CardFooter>
         </form>
       </Form>

@@ -44,14 +44,12 @@ export const useCreateWish = () => {
     onError: (err, newWish, context) => {
       console.error(err);
       queryClient.setQueryData(queryKeys.list(), context?.prevWishes);
-      toast('Помилка', {
+      toast.error('Помилка', {
         description: 'Виникла помилка під час додавання бажання!',
       });
     },
     onSuccess: () =>
-      toast('Успіх', {
-        description: 'Бажання успішно додано!',
-      }),
+      toast.success('Успіх', { description: 'Бажання успішно додано!' }),
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: queryKeys.list() }),
   });
@@ -74,15 +72,42 @@ export const useDeleteWish = () => {
     },
     onError: (err, newWish, context) => {
       queryClient.setQueryData(queryKeys.list(), context?.prevWishes);
-      toast('Помилка', {
+      toast.error('Помилка', {
         description: 'Виникла помилка під час видалення бажання!',
       });
     },
     onSuccess: () =>
-      toast('Успіх', {
-        description: 'Бажання видалено!',
-      }),
+      toast.success('Успіх', { description: 'Бажання видалено!' }),
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: queryKeys.list() }),
   });
 };
+
+export const useParseWishByUrl = () =>
+  useMutation({
+    mutationFn: Api.Wish.parseByUrl,
+    onError: () => {
+      toast.warning('Помилка', {
+        description:
+          'Досягнуто ліміт розпізнавань або ціну не знайдено! Спробуйте парсинг за файлом',
+      });
+    },
+    onSuccess: ({ price }) =>
+      toast.success('Успіх', {
+        description: `Ціна товару складає ${price}грн!`,
+      }),
+  });
+
+export const useParseWishByHtml = () =>
+  useMutation({
+    mutationFn: Api.Wish.parseByHtml,
+    onError: () => {
+      toast.error('Помилка', {
+        description: 'Дані не знайдено!',
+      });
+    },
+    onSuccess: ({ price }) =>
+      toast.success('Успіх', {
+        description: `Ціна товару складає ${price}грн!`,
+      }),
+  });

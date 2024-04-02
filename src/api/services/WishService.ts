@@ -1,5 +1,5 @@
 import { apiClient } from '../ApiClient';
-import { IWish, IWishCreate, IWishPrice } from '../models/Wish';
+import { IWish, IWishCreate, IWishParseResult } from '../models/Wish';
 
 export class WishService {
   getAll = async () => {
@@ -14,9 +14,19 @@ export class WishService {
     ).data;
   };
 
-  parsePrice = async (url: string) => {
-    return (await apiClient.post(`/parse?url=${encodeURIComponent(url)}`))
-      .data as IWishPrice;
+  parseByUrl = async (url: string) => {
+    return (await apiClient.get(`/parse?url=${encodeURIComponent(url)}`))
+      .data as IWishParseResult;
+  };
+
+  parseByHtml = async (htmlContent: File) => {
+    return (
+      await apiClient.post(`/parse`, htmlContent, {
+        headers: {
+          'Content-Type': 'text/html',
+        },
+      })
+    ).data as IWishParseResult;
   };
 
   createOne = async (newWish: IWishCreate) => {
