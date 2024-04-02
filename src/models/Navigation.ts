@@ -1,6 +1,7 @@
 interface INavPoint {
   title: string;
   href: string;
+  prefetch?: boolean;
 }
 
 export const NavPoints: INavPoint[] = [
@@ -19,5 +20,6 @@ export const NavPoints: INavPoint[] = [
   {
     title: 'Експорт в Excel',
     href: '/api/export',
+    prefetch: false,
   },
 ];

@@ -52,6 +52,7 @@ export const AddForm = () => {
     mutate: parseByUrl,
     isPending: isParsingByUrl,
     isError,
+    reset: resetParsingStatus,
   } = useParseWishByUrl();
   const { mutate: parseByHtml, isPending: isParsingByHtml } =
     useParseWishByHtml();
@@ -67,7 +68,7 @@ export const AddForm = () => {
     },
   });
 
-  const { handleSubmit, getValues, setValue, watch } = form;
+  const { handleSubmit, getValues, setValue, watch, reset } = form;
 
   const isFileUploaded = !!watch('file');
 
@@ -95,12 +96,20 @@ export const AddForm = () => {
   };
 
   const onSubmit = ({ title, price, url }: Values) => {
-    createWish({
-      title,
-      price: parseFloat(price),
-      url,
-      dateCreated: new Date().toISOString(),
-    });
+    createWish(
+      {
+        title,
+        price: parseFloat(price),
+        url,
+        dateCreated: new Date().toISOString(),
+      },
+      {
+        onSuccess: () => {
+          resetParsingStatus();
+          reset();
+        },
+      }
+    );
   };
 
   return (

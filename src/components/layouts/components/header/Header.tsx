@@ -19,12 +19,14 @@ const Header = () => {
       </Link>
       <nav>
         <ul className="flex gap-6 text-sm items-center text-center">
-          {NavPoints.map(({ title, href }) => (
+          {NavPoints.map(({ title, href, prefetch }) => (
             <li
               className={cn(pathname === href ? 'font-medium' : 'font-light')}
               key={href}
             >
-              <Link href={href}>{title}</Link>
+              <Link href={href} prefetch={prefetch}>
+                {title}
+              </Link>
             </li>
           ))}
         </ul>
