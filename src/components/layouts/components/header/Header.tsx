@@ -12,7 +12,7 @@ const Header = () => {
   const pathname = usePathname();
 
   return (
-    <header className="flex py-2 px-8 bg-slate-50 dark:bg-slate-900 justify-between items-center fixed w-full rounded-b-2xl border shadow-sm">
+    <header className="flex py-2 px-8 bg-slate-50 dark:bg-slate-900 justify-between items-center fixed w-full rounded-b-2xl border shadow-sm z-50">
       <Link className="text-lg" href="/">
         <span className="font-semibold text-green-600">Comfy</span>
         <span className="font-light text-orange-600">WishList</span>
